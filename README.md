@@ -30,6 +30,48 @@ curl -X POST http://localhost:8081/api/v1/sensors/SENSOR_ID/readings \
 -d '{"value":450}'
 
 ---
+## API Structure
+
+The API follows a resource-based architecture:
+
+* /api/v1/rooms → Manage rooms
+* /api/v1/sensors → Manage sensors
+* /api/v1/sensors/{id}/readings → Manage sensor readings
+
+This structure reflects the real-world relationship between rooms and sensors, as required by REST principles.
+## Error Handling
+
+The API implements robust error handling using custom exceptions and Exception Mappers:
+
+* 409 Conflict → RoomNotEmptyException (room contains sensors)
+* 422 Unprocessable Entity → LinkedResourceNotFoundException (invalid roomId)
+* 403 Forbidden → SensorUnavailableException (sensor in maintenance)
+* 500 Internal Server Error → GlobalExceptionMapper (unexpected errors)
+
+This ensures that the API never exposes raw stack traces and always returns meaningful JSON responses.
+## Logging
+
+Logging is implemented using JAX-RS filters:
+
+* ContainerRequestFilter logs HTTP method and URI
+* ContainerResponseFilter logs HTTP status codes
+
+This approach centralizes logging and avoids duplication across resource classes, improving maintainability and observability.
+## Data Storage
+
+The application uses in-memory data structures (HashMap and ArrayList) instead of a database, as required by the coursework.
+
+This approach simplifies development while demonstrating data management and relationships between entities.
+## Resource Relationships
+
+The API maintains relationships between resources:
+
+* Each Sensor is linked to a Room using roomId
+* Each Room stores a list of sensorIds
+* Sensor readings are nested under sensors
+
+Additionally, when a new reading is added, the sensor’s currentValue is updated to maintain consistency.
+
 
 # REPORT (Answers)
 
